@@ -88,7 +88,15 @@ def __type_annotations_factory():
             return f
         return decorator
 
-    return rtype, params
+    def constant(return_type, value):
+        @params()
+        @rtype(return_type)
+        def _const():
+            return value
+        _const.func_name += '_' + str(value)
+        return value
+
+    return rtype, params, constant
 
 
-rtype, params = __type_annotations_factory()
+rtype, params, constant = __type_annotations_factory()
