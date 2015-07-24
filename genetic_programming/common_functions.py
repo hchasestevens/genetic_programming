@@ -136,3 +136,24 @@ for if_type in if_types:
         return 
     _num_if.func_name += '_' + str(if_type)
     num_ifs.append(_num_if)
+
+@params(func(([Real],), Real))
+@rtype(func(([Real],), Real))
+def list_num_fun_id(f):
+    return f
+
+def make_input(return_type, initial_value=None, name=''):
+    class Input(object):
+        def __init__(self, value):
+            self.value = value
+            self.func_name = name or 'input_' + str(return_type)
+        def set(self, value):
+            self.value = value
+        def __call__(self):
+            return self.value
+
+    new_input = Input(initial_value)
+    rtype(return_type)(params()(new_input))
+
+    return new_input
+
