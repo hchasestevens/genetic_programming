@@ -1,5 +1,5 @@
 from numbers import Real
-from typing import *
+from typing import params, rtype, func, constant
 
 
 # Arithmetic
@@ -17,7 +17,10 @@ def sub(x, y):
 @params(Real, Real)
 @rtype(Real)
 def mod(x, y):
-    return x % y
+    try:
+        return x % y
+    except ZeroDivisionError:
+        return float('inf')
 
 @params(Real, Real)
 @rtype(Real)
@@ -35,7 +38,10 @@ def div(x, y):
 @params(Real, Real)
 @rtype(Real)
 def exp(x, y):
-    return x ** y
+    try:
+        return x ** y
+    except ZeroDivisionError:
+        return float('nan')
 
 one = constant(Real, 1)
 zero = constant(Real, 0)
@@ -133,7 +139,7 @@ for if_type in if_types:
     @params(Real, if_type, if_type)
     @rtype(if_type)
     def _num_if(cond, first, second):
-        return 
+        return first if cond else second
     _num_if.func_name += '_' + str(if_type)
     num_ifs.append(_num_if)
 
@@ -142,18 +148,10 @@ for if_type in if_types:
 def list_num_fun_id(f):
     return f
 
-def make_input(return_type, initial_value=None, name=''):
-    class Input(object):
-        def __init__(self, value):
-            self.value = value
-            self.func_name = name or 'input_' + str(return_type)
-        def set(self, value):
-            self.value = value
-        def __call__(self):
-            return self.value
-
-    new_input = Input(initial_value)
-    rtype(return_type)(params()(new_input))
-
-    return new_input
-
+@params([Real], Real)
+@rtype(Real)
+def num_index(num_list, index):
+    try:
+        return num_list[int(index) % len(num_list)]
+    except (ZeroDivisionError, OverflowError):
+        return float('nan')
