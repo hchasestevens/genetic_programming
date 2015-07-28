@@ -1,4 +1,3 @@
-import functools
 import collections
 
 
@@ -96,8 +95,8 @@ def __type_annotations_factory():
         _const.func_name += '_' + str(value)
         return value
 
-    def lookup_rtype(rtype):
-        return RTYPES[convert_type(rtype)]
+    def lookup_rtype(return_type, convert=True):
+        return RTYPES[(convert_type if convert else __id)(return_type)]
 
     return rtype, params, constant, lookup_rtype
 

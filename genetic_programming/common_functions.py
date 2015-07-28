@@ -1,6 +1,19 @@
+import functools
 from numbers import Real
-from typing import params, rtype, func, constant
 
+from genetic_programming.typing import params, rtype, func, constant, convert_type, prettify_converted_type
+
+
+def ignore(failure_value, *exceptions):
+    def decorator(f):
+        @functools.wraps(f)
+        def wrapper(*args, **kwargs):
+            try:
+                return f(*args, **kwargs)
+            except exceptions:
+                return failure_value
+        return wrapper
+    return decorator
 
 # Arithmetic
 
@@ -16,11 +29,9 @@ def sub(x, y):
 
 @params(Real, Real)
 @rtype(Real)
+@ignore(float('inf'), ZeroDivisionError)
 def mod(x, y):
-    try:
-        return x % y
-    except ZeroDivisionError:
-        return float('inf')
+    return x % y
 
 @params(Real, Real)
 @rtype(Real)
@@ -29,19 +40,15 @@ def mul(x, y):
 
 @params(Real, Real)
 @rtype(Real)
+@ignore(float('inf'), ZeroDivisionError)
 def div(x, y):
-    try:
-        return x / y
-    except ZeroDivisionError:
-        return float('inf')
+    return x / y
 
 @params(Real, Real)
 @rtype(Real)
+@ignore(float('inf'), ZeroDivisionError)
 def exp(x, y):
-    try:
-        return x ** y
-    except ZeroDivisionError:
-        return float('nan')
+    return x ** y
 
 one = constant(Real, 1)
 zero = constant(Real, 0)
@@ -82,17 +89,14 @@ def num_list_empty(nums):
 
 @params([Real])
 @rtype(Real)
+@ignore(float('nan'), IndexError)
 def num_list_head(nums):
-    if nums:
-        return nums[0]
-    return float('nan')
+    return nums[0]
 
 @params([Real])
 @rtype([Real])
 def num_list_tail(nums):
-    if nums:
-        return nums[1:]
-    return nums
+    return nums[1:]
 
 @params([Real])
 @rtype(Real)
@@ -126,6 +130,7 @@ def num_or(first, second):
 
 @params(Real, Real)
 @rtype(Real)
+@ignore(False, TypeError)
 def num_xor(first, second):
     return first ^ second
 
@@ -140,7 +145,7 @@ for if_type in if_types:
     @rtype(if_type)
     def _num_if(cond, first, second):
         return first if cond else second
-    _num_if.func_name += '_' + str(if_type)
+    _num_if.func_name += '_' + prettify_converted_type(convert_type(if_type))
     num_ifs.append(_num_if)
 
 @params(func(([Real],), Real))
@@ -150,8 +155,12 @@ def list_num_fun_id(f):
 
 @params([Real], Real)
 @rtype(Real)
+@ignore(float('nan'), ZeroDivisionError, OverflowError)
 def num_index(num_list, index):
-    try:
-        return num_list[int(index) % len(num_list)]
-    except (ZeroDivisionError, OverflowError):
-        return float('nan')
+    return num_list[int(index) % len(num_list)]
+
+@params(Real)
+@rtype([Real])
+@ignore((), Exception)
+def num_range(x):
+    return tuple(range(int(x)))

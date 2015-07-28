@@ -1,3 +1,3 @@
-from typing import *
-from common_functions import *
-from tree import UnsatisfiableType, build_tree, make_input
+from genetic_programming.typing import *
+from genetic_programming.common_functions import *
+from genetic_programming.tree import UnsatisfiableType, build_tree, make_input
