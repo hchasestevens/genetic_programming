@@ -1,4 +1,5 @@
 from genetic_programming import *
+from lxml.etree import XPathSyntaxError, XPath
  
  
 class Element:
@@ -36,11 +37,16 @@ def xpath_and(cond1, cond2):
 def xpath_or(cond1, cond2):
     return '{} or {}'.format(cond1, cond2)
  
-@params(Element)
-@rtype(bool)
-def condition_on_elem(elem):
-    return elem
+#@params(Element)
+#@rtype(bool)
+#def condition_on_elem(elem):
+#    return elem
  
+@params(int)
+@rtype(bool)
+def nonzero(n):
+    return 'boolean({})'.format(n)
+
 @params(Element, Attribute)
 @rtype(str)
 def get_attribute(elem, attr):
@@ -92,6 +98,8 @@ def validate(expr):
     new_expr = expr.replace('][', ' and ').replace('/.[', '/*[').replace('(*', '(./*').replace('(.[', '(*[')
     if not new_expr.startswith('./'):
         new_expr = './' + new_expr
-    #if new_expr.endswith('/.'):
-    #    new_expr = new_expr[:-1] + '/*'
+    try:
+        XPath(new_expr)
+    except XPathSyntaxError:
+        return ''
     return new_expr
