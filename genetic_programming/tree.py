@@ -129,4 +129,12 @@ def crossover(first_tree, second_tree=None):
     chosen_node.parent.children[chosen_node.index] = chosen_replacement.node
     if second_tree is None:
         return first_tree
-    return first_tree, second_tree
+    return first_tree if first_tree_info is receiving_tree_info else second_tree
+
+
+def tournament_select(trees, scoring_fn, selection_size, requires_population=False):
+    _scoring_fn = scoring_fn(trees) if requires_population else scoring_fn
+    scored_trees = [(_scoring_fn(tree), tree) for tree in trees]
+    while True:
+        __, tree = sorted(random.sample(scored_trees))[0]
+        yield tree
