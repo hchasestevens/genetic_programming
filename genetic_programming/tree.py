@@ -136,9 +136,9 @@ def crossover(first_tree, second_tree=None):
 
 def tournament_select(trees, scoring_fn, selection_size, requires_population=False):
     _scoring_fn = scoring_fn(trees) if requires_population else scoring_fn
-    scored_trees = [(_scoring_fn(tree), tree) for tree in trees]
+    scores = {tree: _scoring_fn(tree) for tree in trees}
     while True:
-        __, tree = max(random.sample(scored_trees))
+        tree = max(random.sample(trees, selection_size), key=scores.get)
         yield copy.deepcopy(tree)
 
 
@@ -146,10 +146,11 @@ def next_generation(trees, scoring_fn, select_fn=functools.partial(tournament_se
     pop_size = len(trees)
     selector = select_fn(trees, scoring_fn)
     new_pop = []
-    if random.random() <= crossover_rate:
-        new_pop.append(crossover(next(selector), next(selector)))
-    elif random.random() <= mutation_rate / (1 - crossover_rate):
-        new_pop.append(mutate(next(selector)))
-    else:
-        new_pop.append(next(selector))
+    for __ in xrange(pop_size):
+        if random.random() <= crossover_rate:
+            new_pop.append(crossover(next(selector), next(selector)))
+        elif random.random() <= mutation_rate / (1 - crossover_rate):
+            new_pop.append(mutate(next(selector)))
+        else:
+            new_pop.append(next(selector))
     return new_pop
