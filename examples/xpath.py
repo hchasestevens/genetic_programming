@@ -111,9 +111,11 @@ div = constant(NodeName, 'div')
 form = constant(NodeName, 'form')
 p = constant(NodeName, 'p')
 span = constant(NodeName, 'span')
+a = constant(NodeName, 'a')
 
 name_attr = constant(Attribute, 'name')
 value_attr = constant(Attribute, 'value')
+href_attr = constant(Attribute, 'href')
  
 @params(Element)
 @rtype(ValidExpression)
@@ -126,3 +128,36 @@ def validate(expr):
     except XPathSyntaxError:
         return ''
     return new_expr
+
+
+def main(url, expression):
+    import requests
+    from lxml import html
+    from random import sample
+    
+    blog_tree = html.fromstring(requests.get(url).content)
+    desired_elements = blog_tree.xpath(expression)
+    training_elements = sample(desired_elements, min(5, len(desired_elements)))
+
+    def score(tree):
+        tree_expression = tree.evaluate()
+        selected_elems = blog_tree.xpath(tree_expression)
+        matches = [training_elem in selected_elems for training_elem in training_elements]
+        if all(matches):
+            return 1. /  len(selected_elems)
+        return -len(matches) + sum(matches)
+
+    pop = [build_tree(ValidExpression) for __ in xrange(500)]
+    
+    for i in xrange(50):
+        print i
+        pop = next_generation(pop, score)
+
+    print
+    best = max(pop, key=score)
+    print best.evaluate()
+    print score(best)
+
+
+if __name__ == "__main__":
+    main('http://blog.chasestevens.com', './/em/a')
