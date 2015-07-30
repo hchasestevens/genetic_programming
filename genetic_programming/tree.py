@@ -2,6 +2,8 @@ import random
 from genetic_programming.typing import lookup_rtype, rtype, params, prettify_converted_type, func
 import collections
 from numbers import Real
+import copy
+import functools
 
 
 class UnsatisfiableType(Exception):
@@ -126,7 +128,7 @@ def crossover(first_tree, second_tree=None):
     chosen_rtype = random.choice(mutual_rtypes)
     chosen_node = random.choice(receiving_tree_info.nodes_by_rtype[chosen_rtype])
     chosen_replacement = random.choice(sending_tree_info.nodes_by_rtype[chosen_rtype])
-    chosen_node.parent.children[chosen_node.index] = chosen_replacement.node
+    chosen_node.parent.children[chosen_node.index] = copy.deepcopy(chosen_replacement.node)
     if second_tree is None:
         return first_tree
     return first_tree if first_tree_info is receiving_tree_info else second_tree
@@ -136,5 +138,18 @@ def tournament_select(trees, scoring_fn, selection_size, requires_population=Fal
     _scoring_fn = scoring_fn(trees) if requires_population else scoring_fn
     scored_trees = [(_scoring_fn(tree), tree) for tree in trees]
     while True:
-        __, tree = sorted(random.sample(scored_trees))[0]
-        yield tree
+        __, tree = max(random.sample(scored_trees))
+        yield copy.deepcopy(tree)
+
+
+def next_generation(trees, scoring_fn, select_fn=functools.partial(tournament_select, selection_size=10), crossover_rate=0.90, mutation_rate=0.01):
+    pop_size = len(trees)
+    selector = select_fn(trees, scoring_fn)
+    new_pop = []
+    if random.random() <= crossover_rate:
+        new_pop.append(crossover(next(selector), next(selector)))
+    elif random.random() <= mutation_rate / (1 - crossover_rate):
+        new_pop.append(mutate(next(selector)))
+    else:
+        new_pop.append(next(selector))
+    return new_pop
