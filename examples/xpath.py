@@ -139,13 +139,20 @@ def main(url, expression):
     desired_elements = blog_tree.xpath(expression)
     training_elements = sample(desired_elements, min(10, len(desired_elements)))
 
+    xpath_scores = {}
     def score(tree):
         tree_expression = tree.evaluate()
+        cached_score = xpath_scores.get(tree_expression)
+        if cached_score is not None:
+            return cached_score
         selected_elems = blog_tree.xpath(tree_expression)
         matches = [training_elem in selected_elems for training_elem in training_elements]
         if all(matches):
-            return 1. /  len(selected_elems)
-        return -len(matches) + sum(matches)
+            final_score = 1. /  len(selected_elems)
+        else:
+            final_score = -len(matches) + sum(matches)
+        xpath_scores[tree_expression] = final_score
+        return final_score
 
     pop = [build_tree(ValidExpression) for __ in xrange(500)]
     
