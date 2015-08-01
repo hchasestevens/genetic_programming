@@ -4,6 +4,7 @@ import collections
 from numbers import Real
 import copy
 import functools
+import numpy
 
 
 class UnsatisfiableType(Exception):
@@ -134,11 +135,41 @@ def crossover(first_tree, second_tree=None):
     return first_tree if first_tree_info is receiving_tree_info else second_tree
 
 
-def tournament_select(trees, scoring_fn, selection_size, requires_population=False):
+def tournament_select(trees, scoring_fn, selection_size, requires_population=False, cov_parsimony=False, random_parsimony=True, random_parsimony_prob=0.125):
     _scoring_fn = scoring_fn(trees) if requires_population else scoring_fn
-    scores = {tree: _scoring_fn(tree) for tree in trees}
+    if cov_parsimony or random_parsimony:
+        sizes = {tree: get_tree_info(tree).num_nodes for tree in trees}
+    if random_parsimony:
+        # Poli 2003:
+        avg_size = sum(sizes.itervalues()) / float(len(sizes))
+        scores = collections.defaultdict(lambda x: float('-inf'))
+        scores.update({
+            tree: _scoring_fn(tree)
+            for tree in trees
+            if sizes[tree] <= avg_size or random_parsimony_prob < random.random() 
+        })
+    else:
+        scores = {tree: _scoring_fn(tree) for tree in trees}
+
+    if cov_parsimony:
+        # Poli & McPhee 2008:
+        covariance_matrix = numpy.cov(numpy.array([(sizes[tree], scores[tree]) for tree in trees]).T)
+        size_variance = numpy.var([sizes[tree] for tree in trees])
+        c = (covariance_matrix / size_variance)[0, 1]  # 0, 1 should be correlation... is this the wrong way around?
+        scores = {tree: score - c * sizes[tree] for tree, score in scores.iteritems()}
+
+    # pseudo-pareto:
+    non_neg_inf_scores = [s for s in scores.itervalues() if s != float('-inf')]
+    avg_score = sum(non_neg_inf_scores) / float(len(non_neg_inf_scores))
+    scores = {
+        tree: float('-inf') if score < avg_score and sizes[tree] > avg_size else score
+        for tree, score in scores.iteritems() 
+    }
+
     while True:
         tree = max(random.sample(trees, selection_size), key=scores.get)
+        if scores[tree] == float('-inf'):
+            continue
         yield copy.deepcopy(tree)
 
 
