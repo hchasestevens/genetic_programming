@@ -120,7 +120,7 @@ href_attr = constant(Attribute, 'href')
 @params(Element)
 @rtype(ValidExpression)
 def validate(expr):
-    new_expr = expr.replace('][', ' and ').replace('/.[', '/*[').replace('(*', '(./*').replace('(.[', '(*[')
+    new_expr = expr.replace('][', ' and ')
     if not new_expr.startswith('./'):
         new_expr = './' + new_expr
     try:
@@ -137,7 +137,7 @@ def main(url, expression):
     
     blog_tree = html.fromstring(requests.get(url).content)
     desired_elements = blog_tree.xpath(expression)
-    training_elements = sample(desired_elements, min(5, len(desired_elements)))
+    training_elements = sample(desired_elements, min(10, len(desired_elements)))
 
     def score(tree):
         tree_expression = tree.evaluate()
