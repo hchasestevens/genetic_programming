@@ -2,7 +2,10 @@ import collections
 
 
 REGISTERED_TYPES = set()
-func = collections.namedtuple('Function', 'params rtype')
+_func = collections.namedtuple('Function', 'params rtype')
+def func(*args):
+    assert len(args) >= 2
+    return _func(tuple(args[:-1]), args[-1])
 
 
 def __id(x):
@@ -14,8 +17,8 @@ def convert_type(t):
         converted = None
     elif isinstance(t, collections.Mapping):
         converted = (collections.Mapping, convert_type(next(t.iterkeys())), convert_type(next(t.itervalues())))
-    elif isinstance(t, func):
-        converted = (func, tuple(map(convert_type, t.params)), convert_type(t.rtype))
+    elif isinstance(t, _func):
+        converted = (_func, tuple(map(convert_type, t.params)), convert_type(t.rtype))
     elif isinstance(t, collections.Iterable):
         converted = (collections.Iterable, convert_type(t[0]))
     else:
@@ -39,7 +42,7 @@ def prettify_converted_type(t):
         formatted_inners = map(prettify_converted_type, (first_inner, second_inner))
         if outer is collections.Mapping:
             return '{{{}: {}}}'.format(*formatted_inners)
-        if outer == func:
+        if outer == _func:
             return '{} -> {}'.format(*formatted_inners)
     except (ValueError, TypeError):
         pass
@@ -51,7 +54,7 @@ def __type_annotations_factory():
 
     def register_first_class_function(f):
         @params(convert=False, first_class=False)
-        @rtype((func, f.__params, f.rtype), convert=False, first_class=False)
+        @rtype((_func, f.__params, f.rtype), convert=False, first_class=False)
         def const_f():
             return f
         const_f.func_name = '_FC_{}'.format(f.func_name)

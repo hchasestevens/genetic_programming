@@ -55,12 +55,12 @@ zero = constant(Real, 0)
 two = constant(Real, 2)
 half = constant(Real, 0.5)
 
-@params(func((Real, Real), Real), Real)
-@rtype(func((Real,), Real))
+@params(func(Real, Real, Real), Real)
+@rtype(func(Real, Real))
 def num_partial(fn, arg):
     return lambda x: fn(arg, x)
 
-@params(func((Real,), Real), [Real])
+@params(func(Real, Real), [Real])
 @rtype([Real])
 def num_map(fn, nums):
     return map(fn, nums)
@@ -136,8 +136,8 @@ def num_xor(first, second):
 
 if_types = (
     Real, [Real], 
-    func((Real,), Real), func((Real, Real), Real),
-    func(([Real],), Real), func(([Real],), [Real]), func((Real,), [Real]),
+    func(Real, Real), func(Real, Real, Real),
+    func([Real], Real), func([Real], [Real]), func(Real, [Real]),
 )
 num_ifs = []
 for if_type in if_types:
@@ -148,8 +148,8 @@ for if_type in if_types:
     _num_if.func_name += '_' + prettify_converted_type(convert_type(if_type))
     num_ifs.append(_num_if)
 
-@params(func(([Real],), Real))
-@rtype(func(([Real],), Real))
+@params(func([Real], Real))
+@rtype(func([Real], Real))
 def list_num_fun_id(f):
     return f
 

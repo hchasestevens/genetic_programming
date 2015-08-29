@@ -1,5 +1,5 @@
 import random
-from genetic_programming.typing import lookup_rtype, rtype, params, prettify_converted_type, func
+from genetic_programming.typing import lookup_rtype, rtype, params, prettify_converted_type, _func
 import collections
 from numbers import Real
 import copy
@@ -15,7 +15,7 @@ class Node(object):
     def __init__(self, f, allowed_functions=None):
         self.f = f
         self.rtype = f.rtype
-        if self.rtype == (func, (Real,), Real):
+        if self.rtype == (_func, (Real,), Real):
             print 'DEBUG'
             while True:
                 pass
