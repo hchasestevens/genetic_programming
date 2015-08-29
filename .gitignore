@@ -232,3 +232,5 @@ $RECYCLE.BIN/
 genetic_programming.pyproj
 *.sln
 *.pyc
+
+gp_env/*
