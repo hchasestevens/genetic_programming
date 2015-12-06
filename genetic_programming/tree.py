@@ -15,10 +15,6 @@ class Node(object):
     def __init__(self, f, allowed_functions=None):
         self.f = f
         self.rtype = f.rtype
-        if self.rtype == (_func, (Real,), Real):
-            print 'DEBUG'
-            while True:
-                pass
         allowed_children = self.f.allowed_children()
         if allowed_functions is not None:
             allowed_children = [[child for child in child_list if child in allowed_functions] for child_list in allowed_children]
@@ -59,9 +55,6 @@ def find_functions(return_type, allowed_functions=None, convert=True):
         return functions
     allowable = frozenset(functions) & frozenset(allowed_functions)
     if not allowable:
-        print 'DEBUG'
-        while True:
-            pass
         raise UnsatisfiableType("No allowable functions satisfying {}.".format(
             (prettify_converted_type if not convert else str)(return_type)
         ))
@@ -135,13 +128,18 @@ def crossover(first_tree, second_tree=None):
     return first_tree if first_tree_info is receiving_tree_info else second_tree
 
 
-def tournament_select(trees, scoring_fn, selection_size, requires_population=False, cov_parsimony=False, random_parsimony=True, random_parsimony_prob=0.125):
+def tournament_select(trees, scoring_fn, selection_size, requires_population=False, cov_parsimony=True, random_parsimony=False, random_parsimony_prob=0.125):
     _scoring_fn = scoring_fn(trees) if requires_population else scoring_fn
+
+    avg_size = 0
+    sizes = {}
+    
     if cov_parsimony or random_parsimony:
         sizes = {tree: get_tree_info(tree).num_nodes for tree in trees}
+        avg_size = sum(sizes.itervalues()) / float(len(sizes))
+    
     if random_parsimony:
         # Poli 2003:
-        avg_size = sum(sizes.itervalues()) / float(len(sizes))
         scores = collections.defaultdict(lambda x: float('-inf'))
         scores.update({
             tree: _scoring_fn(tree)
@@ -155,14 +153,14 @@ def tournament_select(trees, scoring_fn, selection_size, requires_population=Fal
         # Poli & McPhee 2008:
         covariance_matrix = numpy.cov(numpy.array([(sizes[tree], scores[tree]) for tree in trees]).T)
         size_variance = numpy.var([sizes[tree] for tree in trees])
-        c = (covariance_matrix / size_variance)[0, 1]  # 0, 1 should be correlation... is this the wrong way around?
+        c = -(covariance_matrix / size_variance)[0, 1]  # 0, 1 should be correlation... is this the wrong way around?
         scores = {tree: score - c * sizes[tree] for tree, score in scores.iteritems()}
 
     # pseudo-pareto:
     non_neg_inf_scores = [s for s in scores.itervalues() if s != float('-inf')]
     avg_score = sum(non_neg_inf_scores) / float(len(non_neg_inf_scores))
     scores = {
-        tree: float('-inf') if score < avg_score and sizes[tree] > avg_size else score
+        tree: float('-inf') if score < avg_score and sizes.get(tree, 0) > avg_size else score
         for tree, score in scores.iteritems() 
     }
 
