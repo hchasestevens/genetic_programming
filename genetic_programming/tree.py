@@ -1,10 +1,11 @@
 import random
-from genetic_programming.typing import lookup_rtype, rtype, params, prettify_converted_type, _func
 import collections
-from numbers import Real
 import copy
 import functools
+
 import numpy
+
+from .typing import lookup_rtype, rtype, params, prettify_converted_type
 
 
 class UnsatisfiableType(Exception):
@@ -140,7 +141,7 @@ def tournament_select(trees, scoring_fn, selection_size, requires_population=Fal
     
     if random_parsimony:
         # Poli 2003:
-        scores = collections.defaultdict(lambda x: float('-inf'))
+        scores = collections.defaultdict(lambda: float('-inf'))
         scores.update({
             tree: _scoring_fn(tree)
             for tree in trees
@@ -172,14 +173,25 @@ def tournament_select(trees, scoring_fn, selection_size, requires_population=Fal
 
 
 def next_generation(trees, scoring_fn, select_fn=functools.partial(tournament_select, selection_size=10), crossover_rate=0.90, mutation_rate=0.01):
-    pop_size = len(trees)
     selector = select_fn(trees, scoring_fn)
+    pop_size = len(trees)
+    
     new_pop = []
     for __ in xrange(pop_size):
         if random.random() <= crossover_rate:
-            new_pop.append(crossover(next(selector), next(selector)))
+            for __ in xrange(99999):
+                try:
+                    new_pop.append(crossover(next(selector), next(selector)))
+                    break
+                except UnsatisfiableType:
+                    pass
+            else:
+                raise UnsatisfiableType("Trees are not compatible.")
+
         elif random.random() <= mutation_rate / (1 - crossover_rate):
             new_pop.append(mutate(next(selector)))
+
         else:
             new_pop.append(next(selector))
+
     return new_pop
