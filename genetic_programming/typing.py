@@ -34,16 +34,16 @@ def prettify_converted_type(t):
         return t.__name__
     try:
         __, listed_t = t
-        return '[{}]'.format(prettify_converted_type(listed_t))
+        return '[{0}]'.format(prettify_converted_type(listed_t))
     except (ValueError, TypeError):
         pass
     try:
         outer, first_inner, second_inner = t
         formatted_inners = map(prettify_converted_type, (first_inner, second_inner))
         if outer is collections.Mapping:
-            return '{{{}: {}}}'.format(*formatted_inners)
+            return '{{{0}: {1}}}'.format(*formatted_inners)
         if outer == _func:
-            return '{} -> {}'.format(*formatted_inners)
+            return '{0} -> {1}'.format(*formatted_inners)
     except (ValueError, TypeError):
         pass
     return str(t)
@@ -57,7 +57,7 @@ def __type_annotations_factory():
         @rtype((_func, f.__params, f.rtype), convert=False, first_class=False)
         def const_f():
             return f
-        const_f.func_name = '_FC_{}'.format(f.func_name)
+        const_f.func_name = '_FC_{0}'.format(f.func_name)
 
     def check_for_registration(f):
         if hasattr(f, 'rtype') and hasattr(f, '__params'):

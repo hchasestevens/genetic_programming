@@ -20,7 +20,7 @@ class Node(object):
         if allowed_functions is not None:
             allowed_children = [[child for child in child_list if child in allowed_functions] for child_list in allowed_children]
         if not all(allowed_children):
-            raise UnsatisfiableType("{} has a parameter that cannot be satisfied.".format(self.f.func_name))
+            raise UnsatisfiableType("{0} has a parameter that cannot be satisfied.".format(self.f.func_name))
         self.children = [Node(random.choice(child_list)) for child_list in allowed_children]
         self.num_children = len(self.children)
 
@@ -31,7 +31,7 @@ class Node(object):
         try:
             return self.f.to_string(self.children)
         except AttributeError:
-            return '{.f.func_name}({})'.format(self, ', '.join(map(str, self.children)))
+            return '{.f.func_name}({0})'.format(self, ', '.join(map(str, self.children)))
 
 
 class Input(object):
@@ -56,7 +56,7 @@ def find_functions(return_type, allowed_functions=None, convert=True):
         return functions
     allowable = frozenset(functions) & frozenset(allowed_functions)
     if not allowable:
-        raise UnsatisfiableType("No allowable functions satisfying {}.".format(
+        raise UnsatisfiableType("No allowable functions satisfying {0}.".format(
             (prettify_converted_type if not convert else str)(return_type)
         ))
     return list(allowable)

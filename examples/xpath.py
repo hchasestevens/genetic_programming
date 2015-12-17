@@ -21,7 +21,7 @@ class AxisName:
 @params(Element, Element)
 @rtype(Element)
 def child(parent_elem, child_elem):
-    return '{}/{}'.format(parent_elem, child_elem)
+    return '{0}/{1}'.format(parent_elem, child_elem)
  
 #@params(Element, Element)
 #@rtype(Element)
@@ -31,32 +31,32 @@ def child(parent_elem, child_elem):
 @params(str, str)
 @rtype(bool)
 def contains(s1, s2):
-    return 'contains({}, {})'.format(s1, s2)
+    return 'contains({0}, {1})'.format(s1, s2)
  
 @params(bool, bool)
 @rtype(bool)
 def xpath_and(cond1, cond2):
-    return '{} and {}'.format(cond1, cond2)
+    return '{0} and {1}'.format(cond1, cond2)
  
 @params(bool, bool)
 @rtype(bool)
 def xpath_or(cond1, cond2):
-    return '{} or {}'.format(cond1, cond2)
+    return '{0} or {1}'.format(cond1, cond2)
  
 @params(int)
 @rtype(bool)
 def nonzero(n):
-    return 'boolean({})'.format(n)
+    return 'boolean({0})'.format(n)
 
 @params(Element, Attribute)
 @rtype(str)
 def get_attribute(elem, attr):
-    return '{}/@{}'.format(elem, attr)
+    return '{0}/@{1}'.format(elem, attr)
 
 @params(AxisName, NodeName)
 @rtype(Element)
 def make_element(axis_name, node_name):
-    return '{}::{}'.format(axis_name, node_name)
+    return '{0}::{1}'.format(axis_name, node_name)
  
 #@params()
 #@rtype(Element)
@@ -71,27 +71,27 @@ def make_element(axis_name, node_name):
 @params(Element, bool)
 @rtype(Element)
 def condition_on(elem, cond):
-    return '{}[{}]'.format(elem, cond)
+    return '{0}[{1}]'.format(elem, cond)
  
 @params(Element)
 @rtype(int)
 def count(elem):
-    return 'count({})'.format(elem)
+    return 'count({0})'.format(elem)
  
 @params(int, int)
 @rtype(bool)
 def greater_than(num1, num2):
-    return '{} > {}'.format(num1, num2)
+    return '{0} > {1}'.format(num1, num2)
  
 @params(int, int)
 @rtype(bool)
 def num_eq(num1, num2):
-    return '{} = {}'.format(num1, num2)
+    return '{0} = {1}'.format(num1, num2)
  
 @params(str, str)
 @rtype(bool)
 def str_eq(s1, s2):
-    return '{} = {}'.format(s1, s2)
+    return '{0} = {1}'.format(s1, s2)
 
 ancestor_axis = constant(AxisName, 'ancestor')
 ancestor_or_self_axis = constant(AxisName, 'ancestor-or-self')
